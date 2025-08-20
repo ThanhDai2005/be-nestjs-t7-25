@@ -1,19 +1,73 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { EUserRole, User } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { hashPassword } from 'src/utils/hash-password';
+import { CoreOutPut } from 'src/common/dtos/output.dto';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return createUserDto;
+  private readonly logger = new Logger(UsersService.name);
+
+  constructor(
+    @InjectRepository(User) private readonly user: Repository<User>,
+  ) {}
+
+  async create(createUserDto: CreateUserDto): Promise<User | CoreOutPut> {
+    try {
+      const exists = await this.user.findOne({
+        where: {
+          email: createUserDto.email,
+        },
+      });
+
+      if (exists) {
+        return {
+          success: false,
+          error: 'Email already exist',
+        };
+      }
+
+      const passwordByHash = await hashPassword(createUserDto.password);
+
+      const user = this.user.create({
+        email: createUserDto.email,
+        password: passwordByHash,
+        name: createUserDto.name,
+        role: EUserRole.ADMIN,
+      });
+
+      await this.user.save(user);
+
+      return user;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
   }
 
   findAll() {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    try {
+      const user = await this.user.findOne({
+        where: {
+          id: id,
+        },
+      });
+      return user;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

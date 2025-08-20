@@ -10,7 +10,9 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { User } from './entities/user.entity';
+import { CoreOutPut } from 'src/common/dtos/output.dto';
 
 @Controller('users')
 @ApiTags('[Users] Users')
@@ -18,7 +20,13 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('signup')
-  create(@Body() createUserDto: CreateUserDto) {
+  @ApiOperation({
+    summary: 'Signup',
+  })
+  @ApiOkResponse({
+    type: User,
+  })
+  create(@Body() createUserDto: CreateUserDto): Promise<User | CoreOutPut> {
     return this.usersService.create(createUserDto);
   }
 
@@ -28,7 +36,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.usersService.findOne(+id);
   }
 
