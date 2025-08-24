@@ -36,7 +36,7 @@ export class UsersService {
         email: createUserDto.email,
         password: passwordByHash,
         name: createUserDto.name,
-        role: EUserRole.ADMIN,
+        role: EUserRole.USER,
       });
 
       await this.user.save(user);
@@ -62,6 +62,26 @@ export class UsersService {
         },
       });
       return user;
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  async findByEmail(email: string) {
+    try {
+      const user = await this.user.findOneOrFail({
+        where: {
+          email: email,
+        },
+      });
+
+      return {
+        success: true,
+        user,
+      };
     } catch (error) {
       return {
         success: false,

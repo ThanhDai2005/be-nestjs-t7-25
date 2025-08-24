@@ -36,6 +36,12 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiOperation({
+    summary: 'Get info',
+  })
+  @ApiOkResponse({
+    type: User,
+  })
   findOne(@Param('id') id: number) {
     return this.usersService.findOne(+id);
   }
