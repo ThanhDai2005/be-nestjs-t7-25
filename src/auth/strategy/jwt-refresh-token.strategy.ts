@@ -14,7 +14,10 @@ interface TokenPayload {
 }
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtRefreshTokenStrategy extends PassportStrategy(
+  Strategy,
+  'refreshToken',
+) {
   constructor(
     private readonly configService: ConfigService,
     private readonly userService: UsersService,
@@ -22,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => {
-          return req?.cookies?.accessToken || null;
+          return req?.cookies?.refreshToken || null;
         },
       ]),
       ignoreExpiration: false,

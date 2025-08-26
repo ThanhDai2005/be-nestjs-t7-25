@@ -4,6 +4,7 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -40,16 +41,36 @@ export class AuthService {
       role: user.role,
     };
 
-    const token = this.jwtService.sign(payload, {
+    const accessToken = this.jwtService.sign(payload, {
       expiresIn: process.env.JWT_EXPIRATION_TIME,
+      secret: process.env.JWT_SECRET,
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: process.env.JWT_EXPIRATION_TIME_REFRESH_TOKEN || 3600000,
       secret: process.env.JWT_SECRET,
     });
 
     return {
       success: true,
-      token,
+      accessToken,
+      refreshToken,
       user,
     };
+  }
+
+  async refreshToken(user: User) {
+    const payload = {
+      userId: user.id,
+      role: user.role,
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: process.env.JWT_EXPIRATION_TIME,
+      secret: process.env.JWT_SECRET,
+    });
+
+    return { accessToken };
   }
 
   findAll() {

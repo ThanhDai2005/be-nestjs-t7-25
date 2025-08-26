@@ -7,12 +7,17 @@ import {
   Param,
   Delete,
   Res,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto, SignInOutPut } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import JwtRefreshTokenGuard from './guard/jwt-refresh-token.guard';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { User } from 'src/users/entities/user.entity';
 
 @ApiTags('[Users] Auth')
 @Controller('auth')
@@ -29,8 +34,12 @@ export class AuthController {
   ): Promise<SignInOutPut> {
     const data = await this.authService.create(createAuthDto);
 
-    res.cookie('accessToken', data.token, {
+    res.cookie('accessToken', data.accessToken, {
       maxAge: Number(process.env.JWT_EXPIRATION_TIME),
+    });
+
+    res.cookie('refreshToken', data.refreshToken, {
+      maxAge: Number(process.env.JWT_EXPIRATION_TIME_REFRESH_TOKEN),
     });
 
     return {
@@ -41,6 +50,22 @@ export class AuthController {
   @Get()
   findAll() {
     return this.authService.findAll();
+  }
+
+  @UseGuards(JwtRefreshTokenGuard)
+  @ApiBearerAuth('token')
+  @Post('refresh-token')
+  async refreshToken(
+    @CurrentUser() user: User,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const data = await this.authService.refreshToken(user);
+
+    res.cookie('accessToken', data.accessToken, {
+      maxAge: Number(process.env.JWT_EXPIRATION_TIME),
+    });
+
+    return data;
   }
 
   @Get(':id')

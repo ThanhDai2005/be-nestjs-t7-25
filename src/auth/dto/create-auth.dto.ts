@@ -20,5 +20,6 @@ export class CreateAuthDto {
 
 export class SignInOutPut extends CoreOutPut {
   user?: User;
-  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
 }
