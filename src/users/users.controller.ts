@@ -6,13 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { CoreOutPut } from 'src/common/dtos/output.dto';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
+import JwtAuthGuard from 'src/auth/guard/jwt.guard';
 
 @Controller('users')
 @ApiTags('[Users] Users')
@@ -33,6 +41,21 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.findAll();
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('token')
+  @Get('/profile')
+  @ApiOkResponse({
+    type: User,
+  })
+  @ApiOperation({
+    summary: 'Get profile',
+  })
+  async getProfile(@CurrentUser() user: User) {
+    return {
+      user,
+    };
   }
 
   @Get(':id')

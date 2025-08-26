@@ -90,6 +90,26 @@ export class UsersService {
     }
   }
 
+  async findById(userId: number) {
+    try {
+      const user = await this.user.findOneOrFail({
+        where: {
+          id: userId,
+        },
+      });
+
+      return {
+        success: true,
+        user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
