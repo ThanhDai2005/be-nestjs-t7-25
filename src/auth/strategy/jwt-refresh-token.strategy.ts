@@ -34,7 +34,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
   }
 
   async validate({ userId, role }: TokenPayload) {
-    const user = await this.userService.findById(userId);
+    const { user } = await this.userService.findById(userId);
 
     user['password'] = null;
 
