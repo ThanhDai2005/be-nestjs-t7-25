@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,13 +6,17 @@ import { EUserRole, User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { hashPassword } from 'src/utils/hash-password';
 import { CoreOutPut } from 'src/common/dtos/output.dto';
+import { forgotPassword } from './dto/forgot-password.dto';
+import { MailService } from 'src/mails/mail.service';
 
 @Injectable()
 export class UsersService {
   private readonly logger = new Logger(UsersService.name);
 
   constructor(
-    @InjectRepository(User) private readonly user: Repository<User>,
+    @InjectRepository(User)
+    private readonly user: Repository<User>,
+    private readonly mailService: MailService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User | CoreOutPut> {
@@ -108,6 +112,33 @@ export class UsersService {
         error: error.message,
       };
     }
+  }
+
+  async forgotPassword({ email }: forgotPassword) {
+    const userExists = await this.user.findOneOrFail({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!userExists) {
+      throw new BadRequestException('User not found');
+    }
+
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const resetCodeExpiry = new Date(Date.now() + 15 * 60000);
+
+    userExists.resetCode = resetCode;
+    userExists.resetCodeExpiry = resetCodeExpiry;
+
+    this.mailService.sendMailForgotPassword(email, resetCode);
+
+    await this.user.save(userExists);
+
+    return {
+      success: true,
+    };
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

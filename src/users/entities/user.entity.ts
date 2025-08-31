@@ -24,4 +24,14 @@ export class User extends CoreEntity {
     comment: 'Role of the user, can be ADMIN or USER',
   })
   role: EUserRole;
+
+  @Column({
+    nullable: true,
+  })
+  resetCode: string;
+
+  @Column({
+    nullable: true,
+  })
+  resetCodeExpiry: Date;
 }

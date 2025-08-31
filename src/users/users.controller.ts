@@ -21,6 +21,7 @@ import { User } from './entities/user.entity';
 import { CoreOutPut } from 'src/common/dtos/output.dto';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import JwtAuthGuard from 'src/auth/guard/jwt.guard';
+import { forgotPassword } from './dto/forgot-password.dto';
 
 @Controller('users')
 @ApiTags('[Users] Users')
@@ -67,6 +68,14 @@ export class UsersController {
   })
   findOne(@Param('id') id: number) {
     return this.usersService.findOne(+id);
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({
+    summary: 'Forgot password',
+  })
+  async forgotPassword(@Body() dto: forgotPassword) {
+    return this.usersService.forgotPassword(dto);
   }
 
   @Patch(':id')

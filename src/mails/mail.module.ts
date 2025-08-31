@@ -4,6 +4,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { strict } from 'assert';
+import { MailService } from './mail.service';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { strict } from 'assert';
       useFactory: async (configService: ConfigService) => {
         const user = configService.get<string>(
           'MAILER_INCOMING_USER',
-          'thanhdai2005',
+          'Dai2272005nv@gmail.com',
         );
         const pass = configService.get<string>(
           'MAILER_INCOMING_PASS',
@@ -50,7 +51,7 @@ import { strict } from 'assert';
     }),
   ],
   controllers: [],
-  providers: [],
-  exports: [],
+  providers: [MailService],
+  exports: [MailService],
 })
 export class MailModule {}
