@@ -17,11 +17,14 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { User } from './entities/user.entity';
+import { EUserRole, User } from './entities/user.entity';
 import { CoreOutPut } from 'src/common/dtos/output.dto';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import JwtAuthGuard from 'src/auth/guard/jwt.guard';
 import { forgotPassword } from './dto/forgot-password.dto';
+import { UpdatePasswordDto } from './dto/update-userPassword.dto';
+import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('users')
 @ApiTags('[Users] Users')
@@ -44,7 +47,8 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(EUserRole.USER)
   @ApiBearerAuth('token')
   @Get('/profile')
   @ApiOkResponse({
@@ -76,6 +80,14 @@ export class UsersController {
   })
   async forgotPassword(@Body() dto: forgotPassword) {
     return this.usersService.forgotPassword(dto);
+  }
+
+  @Post('update-password')
+  @ApiOperation({
+    summary: 'Update password',
+  })
+  async updatePassword(@Body() dto: UpdatePasswordDto) {
+    return this.usersService.updatePassword(dto);
   }
 
   @Patch(':id')
