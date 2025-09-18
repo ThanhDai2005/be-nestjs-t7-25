@@ -10,6 +10,8 @@ import { User } from './users/entities/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { Product } from './products/entities/product.entity';
+import { ProductImage } from './products/entities/product-image.entity';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -34,7 +36,7 @@ import { Product } from './products/entities/product.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [User, Product],
+      entities: [User, Product, ProductImage],
       synchronize: true,
       logging:
         process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test',
@@ -46,6 +48,7 @@ import { Product } from './products/entities/product.entity';
     UsersModule,
     AuthModule,
     ProductsModule,
+    UploadsModule,
   ],
   controllers: [],
   providers: [],

@@ -1,5 +1,6 @@
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { Column, Entity, Index } from 'typeorm';
+import { Column, Entity, Index, OneToMany } from 'typeorm';
+import { ProductImage } from './product-image.entity';
 
 @Entity()
 export class Product extends CoreEntity {
@@ -37,4 +38,9 @@ export class Product extends CoreEntity {
 
   @Column({ default: 0 })
   totalSold: number;
+
+  @OneToMany(() => ProductImage, (image) => image.product, {
+    cascade: true,
+  })
+  images: ProductImage[];
 }
